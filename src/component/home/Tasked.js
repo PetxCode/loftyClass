@@ -1,17 +1,26 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import styled from "styled-components";
 import { app } from "./../../base";
 import { useHistory } from "react-router-dom";
+import { AuthContext } from "./../../Global/AuthProvider";
 
 const Tasked = () => {
+  const { currentUser } = useContext(AuthContext);
   const history = useHistory();
   const [task, setTask] = useState("");
+  // console.log(currentUser?.uid);
 
   const postTask = async () => {
-    await app.firestore().collection("myTask").doc().set({
-      task,
-      done: false,
-    });
+    await app
+      .firestore()
+      .collection("myTask")
+      .doc(currentUser.uid)
+      .collection("task")
+      .doc()
+      .set({
+        task,
+        done: false,
+      });
     setTask("");
 
     history.push("/");

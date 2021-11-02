@@ -13,6 +13,38 @@ const Register = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
+  const [percentage, setPercentage] = useState(0);
+
+  const [agree, setAgree] = useState(false);
+
+  const [image, setImage] = useState("");
+  const [avatar, setAvatar] = useState("");
+
+  const uploadImage = async (e) => {
+    const file = e.target.files[0];
+    const saveFile = URL.createObjectURL(file);
+    setImage(saveFile);
+
+    const fileRef = await app.storage().ref();
+    const storageRef = fileRef.child("userImage/" + file.name).put(file);
+
+    storageRef.on(
+      firebase.storage.TaskEvent.STATE_CHANGED,
+      (snapshot) => {
+        const count = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+        setPercentage(count);
+        console.log(count);
+      },
+      (err) => console.log(err),
+      () => {
+        storageRef.snapshot.ref.getDownloadURL().then((URL) => {
+          setAvatar(URL);
+          console.log(URL);
+        });
+      }
+    );
+  };
+
   const signUp = async () => {
     try {
       const userData = await app
@@ -28,7 +60,7 @@ const Register = () => {
             userName,
             email,
             password,
-            avatar: userName.charAt(0),
+            avatar: avatar ? avatar : userName.charAt(0),
           });
       }
 
@@ -65,6 +97,13 @@ const Register = () => {
     <Container>
       <Wrapper>
         <Card>
+          {percentage > 0 && percentage <= 99.99 ? (
+            <div>Loading.....</div>
+          ) : null}
+          <Image src={image} />
+          <ImageLabel htmlFor="Pix"> Upload your Image </ImageLabel>
+          <ImageInput type="file" id="Pix" onChange={uploadImage} />
+
           <Input
             placeholder="Enter a new UserName"
             value={userName}
@@ -89,7 +128,21 @@ const Register = () => {
             }}
           />
           <div> {error} </div>
-          <Button onClick={signUp}>Sign Up</Button>
+          <input
+            type="checkbox"
+            value={agree}
+            onChange={(e) => {
+              setAgree(true);
+            }}
+          />
+          <Button
+            onClick={() => {
+              console.log(agree);
+            }}
+            disabled={!agree}
+          >
+            Sign Up
+          </Button>
           <Text>
             or sign up with <span onClick={signUpWithGoogle}>Google</span>
           </Text>
@@ -101,6 +154,32 @@ const Register = () => {
 
 export default Register;
 
+const Image = styled.img`
+  width: 200px;
+  height: 200px;
+  border-radius: 50%;
+  object-fit: cover;
+  background-color: red;
+`;
+const ImageLabel = styled.label`
+  padding: 10px 20px;
+  border-radius: 30px;
+  background-color: coral;
+  color: white;
+  margin: 20px 0;
+  cursor: pointer;
+  font-weight: bold;
+  transition: all 350ms;
+  transform: scale(1);
+
+  :hover {
+    transform: scale(0.97);
+  }
+`;
+const ImageInput = styled.input`
+  display: none;
+`;
+
 const Text = styled.div`
   span {
     color: red;
@@ -109,7 +188,9 @@ const Text = styled.div`
   }
 `;
 
-const Button = styled.div`
+const Button = styled.button`
+  outline: none;
+  border: 0;
   width: 60%;
   height: 50px;
   border-radius: 5px;

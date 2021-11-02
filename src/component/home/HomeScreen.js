@@ -8,14 +8,18 @@ import {
 import { app } from "./../../base";
 import MyTaskBut from "./MyTaskBut";
 import { AuthContext } from "./../../Global/AuthProvider";
+
 const HomeScreen = () => {
   const [data, setData] = useState([]);
-  const value = useContext(AuthContext);
+  const [userData, setUserData] = useState([]);
+  const { currentUser } = useContext(AuthContext);
 
   const getData = async () => {
     await app
       .firestore()
       .collection("myTask")
+      .doc(currentUser.uid)
+      .collection("task")
       .onSnapshot((snapshot) => {
         const r = [];
         snapshot.forEach((doc) => {
@@ -25,31 +29,48 @@ const HomeScreen = () => {
       });
   };
 
+  const getSingle = async () => {
+    await app
+      .firestore()
+      .collection("myUserData")
+      .doc(currentUser.uid)
+      .get()
+      .then((user) => {
+        setUserData(user.data());
+      });
+  };
+
   useEffect(() => {
     getData();
-  }, []);
+    getSingle();
+  }, [userData]);
 
   return (
     <Container>
       <Wrapper>
-        {data?.map((props) => (
-          <Card key={props.id}>
-            <Checker>
-              {props.done ? (
-                <Icon>
-                  <BsFillBookmarkCheckFill />
-                </Icon>
-              ) : (
-                <Icon>
-                  <BsFillBookmarkDashFill />
-                </Icon>
-              )}
-            </Checker>
-            <Text>{props.task}</Text>
+        <h2> Welcome back, {userData?.userName} </h2>
+        {data.length === 0 ? (
+          <div>Post Your First Task </div>
+        ) : (
+          data?.map((props) => (
+            <Card key={props.id}>
+              <Checker>
+                {props.done ? (
+                  <Icon>
+                    <BsFillBookmarkCheckFill />
+                  </Icon>
+                ) : (
+                  <Icon>
+                    <BsFillBookmarkDashFill />
+                  </Icon>
+                )}
+              </Checker>
+              <Text>{props.task}</Text>
 
-            <MyTaskBut myId={props.id} />
-          </Card>
-        ))}
+              <MyTaskBut myId={props.id} />
+            </Card>
+          ))
+        )}
       </Wrapper>
     </Container>
   );

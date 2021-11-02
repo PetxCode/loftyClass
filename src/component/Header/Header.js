@@ -1,4 +1,4 @@
-import React, { useContext } from "react";
+import React, { useState, useContext } from "react";
 import styled from "styled-components";
 import { AiFillHome } from "react-icons/ai";
 import { FaTasks } from "react-icons/fa";
@@ -10,6 +10,24 @@ import { app } from "./../../base";
 export const Header = () => {
   const { currentUser } = useContext(AuthContext);
   console.log(currentUser);
+  const [userData, setUserData] = useState({});
+
+  const getUser = async () => {
+    await app
+      .firestore()
+      .collection("myUserData")
+      .doc(currentUser?.uid)
+      .get()
+      .then((user) => {
+        setUserData(user.data());
+      });
+  };
+
+  React.useEffect(() => {
+    getUser();
+    console.log("This is User", userData);
+  }, [userData]);
+
   return (
     <Container>
       <Wrapper>
@@ -34,7 +52,12 @@ export const Header = () => {
         </Navigation>
 
         <Register>
-          {currentUser ? <Logo /> : null}
+          {currentUser ? (
+            <div>
+              <Logo src={userData?.avatar} />
+              <div>{userData?.userName} </div>
+            </div>
+          ) : null}
 
           {currentUser ? (
             <NavHolder1
@@ -119,6 +142,7 @@ const Logo = styled.img`
   width: 50px;
   border-radius: 50%;
   background-color: white;
+  object-fit: cover;
 `;
 
 const Wrapper = styled.div`
