@@ -1,5 +1,5 @@
 import React, { useContext } from "react";
-import { Route, Redirect } from "react-router-dom";
+import { Route, Navigate } from "react-router-dom";
 import { AuthContext } from "./../../Global/AuthProvider";
 
 const PrivateRoute = ({ component: PropsComp, ...rest }) => {
@@ -11,7 +11,7 @@ const PrivateRoute = ({ component: PropsComp, ...rest }) => {
         return currentUser ? (
           <PropsComp {...Props} />
         ) : (
-          <Redirect to="/register" />
+          <Navigate to="/register" />
         );
       }}
     />

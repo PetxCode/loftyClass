@@ -4,8 +4,9 @@ import { AiFillSetting, AiFillHome } from "react-icons/ai";
 import { BsFillPeopleFill } from "react-icons/bs";
 import { GiFamilyHouse } from "react-icons/gi";
 import { AuthContext } from "./../Global/AuthProvider";
-import { Link } from "react-router-dom";
+import { Link, NavLink } from "react-router-dom";
 import { app } from "./../base";
+import "./Active.css";
 
 const ProjectHeader = () => {
   const { currentUser } = useContext(AuthContext);
@@ -15,30 +16,38 @@ const ProjectHeader = () => {
         <Logo />
 
         <Navigation>
-          <Nav to="/">
+          <Nav to="/" exact activeClassName="active">
             <Icon>
               <AiFillHome />
             </Icon>
             <span>Home</span>
           </Nav>
-          <Nav to="/">
+          <Nav to="/people" activeClassName="active">
             <Icon>
               <BsFillPeopleFill />
             </Icon>
             <span>People</span>
           </Nav>
-          <Nav to="/">
+          <Nav to="/rent" activeClassName="active">
             <Icon>
               <GiFamilyHouse />
             </Icon>
             <span>Rent</span>
           </Nav>
           {currentUser ? (
-            <Nav to="/setting">
+            <Nav to="/setting" activeClassName="active">
               <Icon>
                 <AiFillSetting />
               </Icon>
               <span>Settings</span>
+            </Nav>
+          ) : null}
+          {currentUser ? (
+            <Nav to="/vendor" activeClassName="active">
+              <Icon>
+                <AiFillSetting />
+              </Icon>
+              <span>Be a Vendor/Agent</span>
             </Nav>
           ) : null}
         </Navigation>
@@ -99,7 +108,7 @@ const Logo = styled.img`
 const Navigation = styled.div`
   display: flex;
 `;
-const Nav = styled(Link)`
+const Nav = styled(NavLink)`
   color: white;
   text-decoration: none;
   display: flex;

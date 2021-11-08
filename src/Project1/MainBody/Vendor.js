@@ -3,8 +3,10 @@ import styled from "styled-components";
 import { app } from "./../../base";
 import firebase from "firebase";
 import { AuthContext } from "./../../Global/AuthProvider";
+import { useNavigate } from "react-router-dom";
 
-const Settings = () => {
+const Vendor = () => {
+  const navigate = useNavigate();
   const { currentUser } = useContext(AuthContext);
   const [users, setUsers] = useState([]);
 
@@ -13,7 +15,19 @@ const Settings = () => {
   const [image, setImage] = useState("");
   const [avatar, setAvatar] = useState("");
 
+  const [image1, setImage1] = useState("");
+  const [avatar1, setAvatar1] = useState("");
+
+  const [image2, setImage2] = useState("");
+  const [avatar2, setAvatar2] = useState("");
+
+  const [image3, setImage3] = useState("");
+  const [avatar3, setAvatar3] = useState("");
+
   const [dataUploaded, setDataUploaded] = useState(0);
+  const [dataUploaded1, setDataUploaded1] = useState(0);
+  const [dataUploaded2, setDataUploaded2] = useState(0);
+  const [dataUploaded3, setDataUploaded3] = useState(0);
 
   const uploadImage = async (e) => {
     const file = e.target.files[0];
@@ -34,6 +48,79 @@ const Settings = () => {
         storageRef.snapshot.ref.getDownloadURL().then((URL) => {
           setAvatar(URL);
           console.log(URL);
+        });
+      }
+    );
+  };
+
+  const uploadImage1 = async (e) => {
+    const file = e.target.files[0];
+    const saveFile1 = URL.createObjectURL(file);
+    setImage1(saveFile1);
+
+    const fileRef = await app.storage().ref();
+    const storageRef = fileRef.child("userSignedImage/" + file.name).put(file);
+    storageRef.on(
+      firebase.storage.TaskEvent.STATE_CHANGED,
+      (snapshot) => {
+        const countIt = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+        setDataUploaded1(countIt);
+        console.log(countIt);
+      },
+      (error) => console.log(error.message),
+      () => {
+        storageRef.snapshot.ref.getDownloadURL().then((URL) => {
+          setAvatar1(URL);
+          console.log(URL);
+        });
+      }
+    );
+  };
+
+  const uploadImage2 = async (e) => {
+    const file = e.target.files[0];
+    const saveFile = URL.createObjectURL(file);
+    setImage2(saveFile);
+
+    const fileRef = await app.storage().ref();
+    const storageRef = fileRef.child("userSignedImage/" + file.name).put(file);
+
+    storageRef.on(
+      firebase.storage.TaskEvent.STATE_CHANGED,
+      (snapshot) => {
+        const countIt = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+        setDataUploaded2(countIt);
+        console.log(countIt);
+      },
+      (error) => console.log(error.message),
+      () => {
+        storageRef.snapshot.ref.getDownloadURL().then((URL) => {
+          setAvatar2(URL);
+          console.log(URL);
+        });
+      }
+    );
+  };
+
+  const uploadImage3 = async (e) => {
+    const file = e.target.files[0];
+    const saveFile = URL.createObjectURL(file);
+    setImage3(saveFile);
+
+    const fileRef = await app.storage().ref();
+    const storageRef = fileRef.child("userSignedImage/" + file.name).put(file);
+    storageRef.on(
+      firebase.storage.TaskEvent.STATE_CHANGED,
+      (snapshot) => {
+        const countIt = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+        setDataUploaded3(countIt);
+        console.log(countIt);
+      },
+      (error) => console.log(error.message),
+      () => {
+        storageRef.snapshot.ref.getDownloadURL().then((URL) => {
+          setAvatar3(URL);
+          console.log("avatar3: ", avatar3);
         });
       }
     );
@@ -69,10 +156,10 @@ const Settings = () => {
       });
   };
 
-  const [userName, setUserName] = useState(``);
+  const [userName, setUserName] = useState("");
   const [location, setLocation] = useState("");
   const [phone, setPhone] = useState("");
-  const [gender, setGender] = useState("");
+  const [service, setService] = useState("");
   const [occupation, setOccupation] = useState("");
   const [address, setAddress] = useState("");
 
@@ -87,9 +174,36 @@ const Settings = () => {
         userName,
         phone,
         occupation,
-        gender,
+        service,
         avatar,
       });
+  };
+
+  const createVendor = async () => {
+    await app
+      .firestore()
+      .collection("vendor")
+      .doc(currentUser.uid)
+      .collection("vendorSkill")
+      .doc()
+      .set({
+        avatar,
+        avatar1,
+        avatar2,
+        avatar3,
+        userName,
+        service,
+        phone,
+        occupation,
+        location,
+      });
+    navigate("/");
+  };
+
+  const becomeVendor = async () => {
+    await app.firestore().collection("becomeVendor").doc(currentUser.uid).set({
+      createdBy: currentUser.uid,
+    });
   };
 
   React.useEffect(() => {
@@ -104,9 +218,28 @@ const Settings = () => {
           {/* <span>Sign In Here</span> */}
         </Text>
         <Card>
-          {!image ? <Image src={users?.avatar} /> : <Image src={image} />}
-          <ImageLabel htmlFor="pix">Upload Your Image </ImageLabel>
-          <ImageInput type="file" id="pix" onChange={uploadImage} />
+          <ImageContainer>
+            <ImageCont>
+              <Image src={image} />
+              <ImageLabel htmlFor="pix">Upload Your Image 1</ImageLabel>
+              <ImageInput type="file" id="pix" onChange={uploadImage} />
+            </ImageCont>
+            <ImageCont>
+              <Image src={image1} />
+              <ImageLabel htmlFor="pix1">Upload Your Image 2</ImageLabel>
+              <ImageInput type="file" id="pix1" onChange={uploadImage1} />
+            </ImageCont>
+            <ImageCont>
+              <Image src={image2} />
+              <ImageLabel htmlFor="pix2">Upload Your Image 3</ImageLabel>
+              <ImageInput type="file" id="pix2" onChange={uploadImage2} />
+            </ImageCont>
+            <ImageCont>
+              <Image src={image3} />
+              <ImageLabel htmlFor="pix3">Upload Your Image 4</ImageLabel>
+              <ImageInput type="file" id="pix3" onChange={uploadImage3} />
+            </ImageCont>
+          </ImageContainer>
 
           <InputHolder>
             <Label>User Name</Label>
@@ -141,12 +274,17 @@ const Settings = () => {
             />
           </InputHolder>
           <InputHolder>
-            <Label>User Gender</Label>
+            <Label>Service</Label>
 
-            <Choice value={gender} onChange={(e) => setGender(e.target.value)}>
+            <Choice
+              value={service}
+              onChange={(e) => setService(e.target.value)}
+            >
               <Option value="Prefer not to say">Prefer not to say </Option>
-              <Option value="Male">Male</Option>
-              <Option value="female">Female</Option>
+              <Option value="Fashion">Fashion</Option>
+              <Option value="Event">Event</Option>
+              <Option value="AutoMobile">AutoMobile </Option>
+              <Option value="House Maintainance">House Maintainance</Option>
             </Choice>
           </InputHolder>
           <InputHolder>
@@ -158,15 +296,32 @@ const Settings = () => {
             />
           </InputHolder>
 
-          <Button onClick={updateUserData}>Update Profile</Button>
+          <Button
+            onClick={() => {
+              createVendor();
+              becomeVendor();
+            }}
+          >
+            Apply for Vendor
+          </Button>
         </Card>
       </Wrapper>
     </Container>
   );
 };
 
-export default Settings;
+export default Vendor;
 
+const ImageCont = styled.div`
+  display: flex;
+  flex-direction: column;
+  margin: 10px;
+`;
+const ImageContainer = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+`;
 const Option = styled.option``;
 const Choice = styled.select`
   width: 300px;
